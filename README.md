@@ -91,6 +91,7 @@ https://i.instagram.com/api/v1/users/web_profile_info/?username=`username`
     * 目前僅能間隔時間爬一次資料 (應該只能這樣了?)。
     * 改成登入狀態可爬更多資料 (不限貼文數、不公開帳號...等等)。
     * `x-ig-app-id` 這個 Header 不確定作用也不確定過段時間會不會更動。
+* 增加公開的 Docker Image 方便使用。
 
 ## Reference
 * Discord API on Javascript  
