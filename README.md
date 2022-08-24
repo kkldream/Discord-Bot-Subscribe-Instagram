@@ -61,7 +61,7 @@ https://i.instagram.com/api/v1/users/web_profile_info/?username=`username`
 
 接著看請求內容 Headers 的部分有什麼驗證機制，經過測試 Headers 內包含以下內容就可獲取資料，目前不清楚 `x-ig-app-id` 此標頭是在做什麼，目前測試不論換電腦、換IP、清Cookies、等幾天、登出登入，這個值都不會改變。
 
-```json
+```
 'x-ig-app-id': '936619743392459'
 ```
 
