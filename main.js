@@ -57,7 +57,7 @@ client.on('message', msg => {
             }
             let reply = '訂閱中：'
             res.forEach(item => {
-                reply += `\n${item.username} (https://www.instagram.com/${item.username}/)`
+                reply += `\n - ${item.username} (https://www.instagram.com/${item.username}/)`
             });
             msg.channel.send(reply);
         })
