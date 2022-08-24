@@ -41,6 +41,20 @@ npm run start
 }
 ```
 
+## Docker
+
+需先有 DB 環境和 token.json 檔
+
+```sh
+# 編譯建立 Docker Image
+docker build -t dcbot-subig:latest .
+
+# 執行 Containers
+docker run -itd --name dcbot-subig dcbot-subig:latest
+```
+
+`dcbot-subig` 為 Image 名稱可自行更改
+
 ## Web Crawler for Instagram
 
 > 此方法於 2022/08/24 測試可用
