@@ -19,6 +19,7 @@ client.on('message', msg => {
     if (msg.content.indexOf(tagName + ' ') != 0) return;
     let text = msg.content.substring(tagName.length + 1);
     channel = msg.channel;
+    console.log(channel);
     console.log(`[${msg.author.tag}] ${text}`);
     if (msg.author == client.user) return
     if (text === 'help') {

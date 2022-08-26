@@ -63,3 +63,31 @@ module.exports = {
     findSubUser,
     getSubUserList
 };
+
+// addSubUser("test").then(res => {
+//     console.log('add:');
+//     console.log(res);
+//     console.log();
+// })
+
+// findSubUser("test").then(res => {
+//     console.log('find:');
+//     console.log(res);
+//     console.log();
+// })
+
+// addSubUser("test").then(res => {
+//     console.log('add:');
+//     console.log(res);
+//     console.log();
+//     getSubUserList().then(res => {
+//         console.log('get:');
+//         console.log(res);
+//         console.log();
+//         delSubUser({username: "test"}).then(res => {
+//             console.log('del:');
+//             console.log(res);
+//             console.log();
+//         })
+//     })
+// })
