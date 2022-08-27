@@ -4,17 +4,22 @@
 
 Instagram 貼文更新會自動發布貼文內容到 Discord 的機器人。
 
+以下為機器人連結提供大家使用，由於是免費提供所以有隨時停機的可能。
+
+https://discord.com/api/oauth2/authorize?client_id=1011210756534055024&permissions=0&scope=bot
+
 ## Usage
 
 標記機器人帳號並加上以下操作指令：  
-- help : 查看幫助
-- start : 自動訂閱發布啟動 (每10分鐘更新)
-- stop : 自動訂閱發布停止
-- check : 單次即時訂閱檢查
-- list : 查看目前訂閱者
-- add : 增加訂閱者
-- del : 移除訂閱者
-- del -all : 移除所有訂閱者
+- `help` : 查看幫助
+- `init` : 對此頻道進行初始化才可使用以下功能
+- `start` : 此頻道的自動訂閱發布啟動 (大概每 10 分鐘更新)
+- `stop` : 此頻道的自動訂閱發布停止
+- `status` : 查看此頻道的自動訂閱發布狀態
+- `list` : 查看此頻道的訂閱者
+- `add [用戶名稱]` : 增加此頻道的訂閱者
+- `del [用戶名稱]` : 移除此頻道的訂閱者
+- `del -all` : 移除此頻道的所有訂閱者
 
 Example：  
 ![](images/img_0.png)
@@ -85,13 +90,14 @@ https://i.instagram.com/api/v1/users/web_profile_info/?username=`username`
 
 ## Improvement
 
-* 目前僅限於單個頻道內作用，改成多頻道多伺服器皆可同時使用。
 * 新增權限功能，僅限管理員能控制。
 * 改善爬蟲方法。
     * 目前僅能間隔時間爬一次資料 (應該只能這樣了?)。
     * 改成登入狀態可爬更多資料 (不限貼文數、不公開帳號...等等)。
+    * 未登入狀態爬的頻率太高會被鎖 IP。
     * `x-ig-app-id` 這個 Header 不確定作用也不確定過段時間會不會更動。
 * 增加公開的 Docker Image 方便使用。
+* DB 的連線方式改用靜態和重連檢查的方法。
 
 ## Reference
 * Discord API on Javascript  
