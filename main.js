@@ -6,7 +6,7 @@ const utils = require('./utils.js');
 
 const client = new Discord.Client();
 
-var timerDelay = 10 * 60000;
+var timerDelay = 30 * 60000;
 var tagId;
 
 client.on('ready', () => {
