@@ -26,7 +26,7 @@ client.on('message', msg => {
             'Usage :\n' +
             '  - `help` : 查看幫助\n' +
             '  - `init` : 對此頻道進行初始化才可使用以下功能\n' +
-            '  - `start` : 此頻道的自動訂閱發布啟動 (每' + parseInt(timerDelay / 60000) + '分鐘更新)\n' +
+            '  - `start` : 此頻道的自動訂閱發布啟動 (大概每' + parseInt(timerDelay / 60000) + '分鐘更新)\n' +
             '  - `stop` : 此頻道的自動訂閱發布停止\n' +
             '  - `status` : 查看此頻道的自動訂閱發布狀態\n' +
             '  - `list` : 查看此頻道的訂閱者\n' +
@@ -155,7 +155,7 @@ client.on('message', msg => {
 });
 
 function crawlerIg() {
-    db.getAllSubscribeChannelInfo()
+    db.getAllSubscribeChannelInfoByFilter({ 'deleted': false })
         // 取得所有訂閱者列表
         .then(res => {
             // console.log(res);
@@ -199,8 +199,10 @@ function crawlerIg() {
         // 將新貼文推撥至各頻道並保存至DB
         .then(async newPosts => {
             console.log(newPosts);
+            
             // 推撥至各頻道
-            db.getAllSubscribeChannelInfo().then(res => {
+            var filter = { 'enable': true, 'deleted': false, };
+            db.getAllSubscribeChannelInfoByFilter(filter).then(res => {
                 let findResultList = res.findResult;
                 findResultList.forEach(findResult => {
                     let subscribeUserList = findResult.subscribes;
@@ -208,19 +210,21 @@ function crawlerIg() {
                         new Discord.Guild(client, { id: findResult.guild.id }),
                         { id: findResult.channel.id },
                     );
+                    console.log(findResult);
                     newPosts.forEach(post => {
-                        if (!subscribeUserList.indexOf(post.owner.username)) {
+                        if (subscribeUserList.indexOf(post.owner.username) !== -1) {
                             subscribeChannel.send(`${post.owner.username} 於 ${utils.timeConverter(post.postTimestamp)} 發布了新貼文\n(${post.url})`);
                         }
                     })
                 })
             })
+
             // 保存至DB
             if (newPosts.length === 0) return;
             let insertResult = await db.insertPostRecord(newPosts);
             console.log(insertResult);
+            
         });
-    return;
 }
 
 setInterval(crawlerIg, timerDelay);

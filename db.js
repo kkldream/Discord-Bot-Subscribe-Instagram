@@ -127,17 +127,14 @@ module.exports = {
     },
 
     // 取得所有頻道資訊
-    getAllSubscribeChannelInfo: () => {
+    getAllSubscribeChannelInfoByFilter: (filter) => {
         return execute('subscribes', async col => {
-            var filter = {
-                'enable': true,
-                'deleted': false,
-            };
             let findResult = await col.find(filter).toArray();
             return { findResult };
         });
     },
 
+    // 自訂義搜尋貼文
     findPostByFilter: (filter) => {
         return execute('posts', async col => {
             let findResult = await col.find(filter).toArray();
@@ -145,6 +142,7 @@ module.exports = {
         });
     },
 
+    // 插入貼文陣列
     insertPostRecord: (docList) => {
         return execute('posts', async col => {
             let insertResult = await col.insertMany(docList);
