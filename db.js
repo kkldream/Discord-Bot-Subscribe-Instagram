@@ -1,93 +1,154 @@
-const mongo = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 const { mongodb_url } = require('./token.json');
 
-async function pushSubRecord(doc) {
-    const client = await mongo.connect(mongodb_url);
-    const coll = client.db('discord_bot').collection('record');
-    const result = await coll.insertOne(doc);
-    await client.close();
-    return result;
-};
-
-async function getLastPost(filter) {
-    const client = await mongo.connect(mongodb_url);
-    const coll = client.db('discord_bot').collection('record');
-    const sort = { 'timestamp': -1 };
-    const result = await coll.findOne(filter, { sort });
-    await client.close();
-    return result;
-}
-
-async function addSubUser(name) {
-    const client = await mongo.connect(mongodb_url);
-    const coll = client.db('discord_bot').collection('subscribe');
-    const find_result = await coll.findOne({ username: name });
-    if (!find_result) {
-        const result = await coll.insertOne({ username: name });
-        await client.close();
-        return result;
-    }
-    return false;
-};
-
-async function delSubUser(filter) {
-    const client = await mongo.connect(mongodb_url);
-    const coll = client.db('discord_bot').collection('subscribe');
-    const result = await coll.deleteMany(filter);
-    await client.close();
-    return result;
-};
-
-async function findSubUser(name) {
-    const client = await mongo.connect(mongodb_url);
-    const coll = client.db('discord_bot').collection('subscribe');
-    const result = await coll.findOne({ username: name });
-    await client.close();
-    return result;
-};
-
-async function getSubUserList() {
-    const client = await mongo.connect(mongodb_url);
-    const coll = client.db('discord_bot').collection('subscribe');
-    const cursor = coll.find({});
-    const result = await cursor.toArray()
+async function execute(colName, func) {
+    const client = await MongoClient.connect(mongodb_url);
+    const col = client.db('discord_bot').collection(colName);
+    const result = await func(col);
     await client.close();
     return result;
 };
 
 module.exports = {
-    pushSubRecord,
-    getLastPost,
-    addSubUser,
-    delSubUser,
-    findSubUser,
-    getSubUserList
-};
 
-// addSubUser("test").then(res => {
-//     console.log('add:');
-//     console.log(res);
-//     console.log();
-// })
+    // [初始化/更新]頻道
+    addSubscribeChannel: (msg) => {
+        return execute('subscribes', async col => {
+            let updateResult = await col.updateOne({
+                'channel.id': msg.channel.id,
+                'guild.id': msg.channel.guild.id,
+                'deleted': false
+            }, {
+                $set: {
+                    'channel.name': msg.channel.name,
+                    'guild.name': msg.channel.guild.name,
+                    refreshTimestamps: new Date(msg.createdTimestamp),
+                }
+            });
+            let insertResult;
+            if (updateResult.matchedCount == 0) {
+                insertResult = await col.insertOne({
+                    channel: {
+                        id: msg.channel.id,
+                        name: msg.channel.name,
+                    },
+                    guild: {
+                        id: msg.channel.guild.id,
+                        name: msg.channel.guild.name,
+                    },
+                    subscribes: [],
+                    createdTimestamps: new Date(msg.createdTimestamp),
+                    refreshTimestamps: new Date(msg.createdTimestamp),
+                    enable: false,
+                    deleted: false,
+                });
+            }
+            return { updateResult, insertResult };
+        });
+    },
 
-// findSubUser("test").then(res => {
-//     console.log('find:');
-//     console.log(res);
-//     console.log();
-// })
+    // 增加指定訂閱者
+    addSubscribeUser: (msg, username) => {
+        return execute('subscribes', async col => {
+            var filter = {
+                'channel.id': msg.channel.id,
+                'guild.id': msg.channel.guild.id,
+                'deleted': false
+            };
+            let findResult = await col.findOne(filter);
+            let updateResult;
+            if (!findResult) return { findResult, updateResult };
+            if (findResult.subscribes.indexOf(username) === -1) {
+                updateResult = await col.updateMany({ _id: findResult._id }, { $push: { subscribes: username } });
+            }
+            return { findResult, updateResult };
+        });
+    },
 
-// addSubUser("test").then(res => {
-//     console.log('add:');
-//     console.log(res);
-//     console.log();
-//     getSubUserList().then(res => {
-//         console.log('get:');
-//         console.log(res);
-//         console.log();
-//         delSubUser({username: "test"}).then(res => {
-//             console.log('del:');
-//             console.log(res);
-//             console.log();
-//         })
-//     })
-// })
+    // 刪除指定訂閱者
+    delSubscribeUser: (msg, username) => {
+        return execute('subscribes', async col => {
+            var filter = {
+                'channel.id': msg.channel.id,
+                'guild.id': msg.channel.guild.id,
+                'deleted': false
+            };
+            let findResult = await col.findOne(filter);
+            let updateResult;
+            if (!findResult) return { findResult, updateResult };
+            updateResult = await col.updateMany({ _id: findResult._id }, { $pull: { subscribes: username } });
+            return { findResult, updateResult };
+        });
+    },
+
+    // 刪除所有訂閱者
+    delAllSubscribeUser: (msg) => {
+        return execute('subscribes', async col => {
+            var filter = {
+                'channel.id': msg.channel.id,
+                'guild.id': msg.channel.guild.id,
+                'deleted': false
+            };
+            let findResult = await col.findOne(filter);
+            let updateResult;
+            if (!findResult) return { findResult, updateResult };
+            updateResult = await col.updateMany({ _id: findResult._id }, { $set: { subscribes: [] } });
+            return { findResult, updateResult };
+        });
+    },
+
+    // 取得當前頻道資訊
+    getSubscribeChannelInfo: (msg) => {
+        return execute('subscribes', async col => {
+            var filter = {
+                'channel.id': msg.channel.id,
+                'guild.id': msg.channel.guild.id,
+                'deleted': false
+            };
+            let findResult = await col.findOne(filter);
+            return { findResult };
+        });
+    },
+
+    // [啟動/停止]頻道訂閱功能
+    setSubscribeChannel: (msg, status) => {
+        return execute('subscribes', async col => {
+            var filter = {
+                'channel.id': msg.channel.id,
+                'guild.id': msg.channel.guild.id,
+                'deleted': false
+            };
+            let findResult = await col.findOne(filter);
+            let updateResult;
+            if (!findResult) return { findResult, updateResult };
+            updateResult = await col.updateOne({ _id: findResult._id }, { $set: { enable: status } });
+            return { findResult, updateResult };
+        });
+    },
+
+    // 取得所有頻道資訊
+    getAllSubscribeChannelInfo: () => {
+        return execute('subscribes', async col => {
+            var filter = {
+                'enable': true,
+                'deleted': false,
+            };
+            let findResult = await col.find(filter).toArray();
+            return { findResult };
+        });
+    },
+
+    findPostByFilter: (filter) => {
+        return execute('posts', async col => {
+            let findResult = await col.find(filter).toArray();
+            return findResult
+        });
+    },
+
+    insertPostRecord: (docList) => {
+        return execute('posts', async col => {
+            let insertResult = await col.insertMany(docList);
+            return insertResult
+        });
+    },
+}
