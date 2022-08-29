@@ -22,7 +22,7 @@ client.on('message', msg => {
     console.log(`[${msg.channel.guild.name} -> ${msg.channel.name} -> ${msg.author.tag}] ${argParm.slice(1).toString()}`);
 
     if (argParm[1] === 'help') {
-        msg.channel.send(
+        channelSend(msg.channel,
             'Usage :\n' +
             '  - `help` : 查看幫助\n' +
             '  - `init` : 對此頻道進行初始化才可使用以下功能\n' +
@@ -38,8 +38,8 @@ client.on('message', msg => {
     else if (argParm[1] === 'init') {
         db.addSubscribeChannel(msg).then(res => {
             console.log(res);
-            if (res.insertResult) msg.channel.send('建立初始化頻道');
-            else msg.channel.send('更新初始化頻道');
+            if (res.insertResult) channelSend(msg.channel, '建立初始化頻道');
+            else channelSend(msg.channel, '更新初始化頻道');
         });
     }
     else if (argParm[1] === 'add') {
@@ -47,14 +47,14 @@ client.on('message', msg => {
         db.addSubscribeUser(msg, username).then(res => {
             console.log(res);
             if (!res.findResult) {
-                msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                 return;
             }
             if (!res.updateResult) {
-                msg.channel.send(`訂閱已存在 (https://www.instagram.com/${username}/)`);
+                channelSend(msg.channel, `訂閱已存在 (https://www.instagram.com/${username}/)`);
                 return;
             }
-            msg.channel.send(`開始訂閱 ${username} 帳號 (https://www.instagram.com/${username}/)`);
+            channelSend(msg.channel, `開始訂閱 ${username} 帳號 (https://www.instagram.com/${username}/)`);
 
             // 篩選所有貼文列表取得新貼文列表
             crawler(username)
@@ -109,14 +109,14 @@ client.on('message', msg => {
             db.delAllSubscribeUser(msg).then(res => {
                 console.log(res);
                 if (!res.findResult) {
-                    msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                    channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                     return;
                 }
                 if (res.updateResult.modifiedCount === 0) {
-                    msg.channel.send(`無訂閱存在`);
+                    channelSend(msg.channel, `無訂閱存在`);
                     return;
                 }
-                msg.channel.send(`取消訂閱所有帳號，共 ${res.updateResult.modifiedCount} 個`);
+                channelSend(msg.channel, `取消訂閱所有帳號，共 ${res.updateResult.modifiedCount} 個`);
             })
         }
         else {
@@ -124,14 +124,14 @@ client.on('message', msg => {
             db.delSubscribeUser(msg, username).then(res => {
                 console.log(res);
                 if (!res.findResult) {
-                    msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                    channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                     return;
                 }
                 if (res.updateResult.modifiedCount === 0) {
-                    msg.channel.send(`此訂閱不存在`);
+                    channelSend(msg.channel, `此訂閱不存在`);
                     return;
                 }
-                msg.channel.send(`取消訂閱 ${username} 帳號`);
+                channelSend(msg.channel, `取消訂閱 ${username} 帳號`);
             })
         }
     }
@@ -139,67 +139,85 @@ client.on('message', msg => {
         db.getSubscribeChannelInfo(msg).then(res => {
             console.log(res);
             if (!res.findResult) {
-                msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                 return;
             }
             let subArr = res.findResult.subscribes;
             if (subArr.length == 0) {
-                msg.channel.send('目前無帳號訂閱中');
+                channelSend(msg.channel, '目前無帳號訂閱中');
                 return;
             }
             let replyStr = '訂閱中：'
             subArr.forEach(item => {
                 replyStr += `\n - ${item} (https://www.instagram.com/${item}/)`
             });
-            msg.channel.send(replyStr);
+            channelSend(msg.channel, replyStr);
         })
     }
     else if (argParm[1] === 'status') {
         db.getSubscribeChannelInfo(msg).then(res => {
             console.log(res);
             if (!res.findResult) {
-                msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                 return;
             }
             if (res.findResult.enable) {
-                msg.channel.send('此頻道訂閱功能狀態：啟動中');
+                channelSend(msg.channel, '此頻道訂閱功能狀態：啟動中');
                 return;
             }
-            msg.channel.send('此頻道訂閱功能狀態：未啟動');
+            channelSend(msg.channel, '此頻道訂閱功能狀態：未啟動');
         })
     }
     else if (argParm[1] === 'start') {
         db.setSubscribeChannel(msg, true).then(res => {
             console.log(res);
             if (!res.findResult) {
-                msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                 return;
             }
             if (res.updateResult.modifiedCount === 0) {
-                msg.channel.send('頻道訂閱功能目前啟動中');
+                channelSend(msg.channel, '頻道訂閱功能目前啟動中');
                 return;
             }
-            msg.channel.send(`啟動頻道訂閱功能 (每${parseInt(timerDelay / 60000)}分鐘更新)`);
+            channelSend(msg.channel, `啟動頻道訂閱功能 (每${parseInt(timerDelay / 60000)}分鐘更新)`);
         });
     }
     else if (argParm[1] === 'stop') {
         db.setSubscribeChannel(msg, false).then(res => {
             console.log(res);
             if (!res.findResult) {
-                msg.channel.send(`尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
+                channelSend(msg.channel, `尚未初始化頻道 (輸入 "${tagId} init" 指令)`);
                 return;
             }
             if (res.updateResult.modifiedCount === 0) {
-                msg.channel.send('頻道訂閱功能目前未啟動');
+                channelSend(msg.channel, '頻道訂閱功能目前未啟動');
                 return;
             }
-            msg.channel.send('停止頻道訂閱功能');
+            channelSend(msg.channel, '停止頻道訂閱功能');
         });
     }
     else if (argParm[1] === 'crawler') {
         crawlerIg();
     }
 });
+
+const symbols = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '{', '}', '[', ']', '"', '\'', ':', ';', '?', '/', '.', '<', '>', '|', '*', '-', '+', '=', '`'];
+function channelSend(channel, text) {
+    let allOutput = '';
+    text.split('\n').forEach(str => {
+        let httpStart = str.indexOf('https://');
+        let oneOutput = '';
+        for (let index = 0; index < str.length; index++) {
+            let ch = str[index];
+            if (symbols.indexOf(ch) !== -1 && index < httpStart)
+                oneOutput += `\\${ch}`;
+            else
+                oneOutput += ch;
+        }
+        allOutput += `${oneOutput}\n`;
+    })
+    channel.send(allOutput);
+}
 
 function crawlerIg() {
     console.log('\ncrawlerIg :');
