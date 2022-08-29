@@ -116,7 +116,7 @@ client.on('message', msg => {
                     channelSend(msg.channel, `無訂閱存在`);
                     return;
                 }
-                channelSend(msg.channel, `取消訂閱所有帳號，共 ${res.updateResult.modifiedCount} 個`);
+                channelSend(msg.channel, `取消訂閱所有帳號，共 ${res.findResult.subscribes.length} 個`);
             })
         }
         else {
