@@ -12,6 +12,8 @@
   "dependencies": {
     "cross-fetch": "^3.1.5",
     "discord.js": "^12.5.3",
+    "dotenv": "^16.0.3",
+    "moment": "^2.29.4",
     "mongodb": "^4.9.0",
     "node-fetch": "^3.2.10",
     "nodemon": "^2.0.19"

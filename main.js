@@ -1,5 +1,5 @@
+require("dotenv").config();
 const Discord = require('discord.js');
-const { token } = require('./token.json');
 const crawler = require('./crawler.js');
 const db = require('./db.js');
 const utils = require('./utils.js');
@@ -294,4 +294,4 @@ function crawlerIg() {
 }
 
 setInterval(crawlerIg, timerDelay);
-client.login(token);
+client.login(process.env.DISCORD_BOT_TOKEN);

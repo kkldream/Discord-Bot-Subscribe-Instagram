@@ -1,8 +1,7 @@
 const { MongoClient } = require('mongodb');
-const { mongodb_url } = require('./token.json');
 
 async function execute(colName, func) {
-    const client = await MongoClient.connect(mongodb_url);
+    const client = await MongoClient.connect(process.env.MONGODB_URL);
     const col = client.db('discord_bot').collection(colName);
     const result = await func(col);
     await client.close();

@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 function numberAddSpace(value) {
     let str = value.toString();
     if (str.length == 0)
@@ -17,16 +19,7 @@ function getArgParm(input) {
 }
 
 function timeConverter(UNIX_timestamp) {
-    var date = new Date(UNIX_timestamp);
-    var year = date.getFullYear();
-    var month = numberAddSpace(date.getMonth());
-    var day = numberAddSpace(date.getDate());
-    var hour = numberAddSpace(date.getHours());
-    var min = numberAddSpace(date.getMinutes());
-    var sec = numberAddSpace(date.getSeconds());
-    var sec = numberAddSpace(date.getSeconds());
-    var output = `${year}/${month}/${day}-${hour}:${min}:${sec}`;
-    return output;
+    return moment(UNIX_timestamp).format('YYYY/MM/DD-hh:mm:ss');
 }
 
 module.exports = {
