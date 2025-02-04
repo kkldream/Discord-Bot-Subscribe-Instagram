@@ -19,9 +19,8 @@ docker build \\
           }
           steps {
             withCredentials(bindings: [
-                                          string(credentialsId: 'kk_mongodb_url', variable: 'MONGODB_URL'),
-                                          string(credentialsId: 'openai_api_key', variable: 'OPENAI_API_KEY'),
-                                          string(credentialsId: 'dc-subbot-discord_bot_token', variable: 'DISCORD_BOT_TOKEN')
+                                          string(credentialsId: 'kk-mongodb_url', variable: 'MONGODB_URL'),
+                                          string(credentialsId: 'dc_subbot-discord_bot_token', variable: 'DISCORD_BOT_TOKEN')
                                         ]) {
                 sh '''run_name=jk-${PROJECT_NAME}-${BRANCH_NAME}
 build_name=jenkins/${PROJECT_NAME}:${BRANCH_NAME}-${BUILD_NUMBER}
